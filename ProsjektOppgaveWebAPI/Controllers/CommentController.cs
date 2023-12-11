@@ -6,7 +6,7 @@ using ProsjektOppgaveWebAPI.Services.CommentServices;
 
 namespace ProsjektOppgaveWebAPI.Controllers;
 
-[Route("/[controller]")]
+[Route("/api/[controller]")]
 [ApiController]
 public class CommentController : ControllerBase
 {

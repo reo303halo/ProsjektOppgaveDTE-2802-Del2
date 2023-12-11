@@ -5,7 +5,7 @@ using ProsjektOppgaveWebAPI.Services.TagServices;
 
 namespace ProsjektOppgaveWebAPI.Controllers;
 
-[Route("/[controller]")]
+[Route("/api/[controller]")]
 [ApiController]
 public class TagController : ControllerBase
 {
