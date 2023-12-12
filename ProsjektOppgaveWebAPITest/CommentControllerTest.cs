@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using ProsjektOppgaveWebAPI.Controllers;
 using ProsjektOppgaveWebAPI.Models;
+using ProsjektOppgaveWebAPI.Models.ViewModel;
 using ProsjektOppgaveWebAPI.Services.CommentServices;
 
 namespace ProsjektOppgaveWebAPITest;
@@ -64,7 +65,7 @@ public class CommentControllerTest
         _controller.ModelState.AddModelError("error", "some error");
 
         // Act
-        var result = await _controller.Create(new Comment());
+        var result = await _controller.Create(new CommentViewModel());
 
         // Assert
         Assert.IsType<BadRequestObjectResult>(result);
@@ -74,17 +75,19 @@ public class CommentControllerTest
     public async Task Create_ReturnsCreatedAtAction_WhenModelStateIsValid()
     {
         // Arrange
-        var comment = new Comment();
+        var comment = new CommentViewModel { Text = "Test" };
+        var newComment = new Comment { Text = comment.Text };
 
         // Mock User
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        // Mock User
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, "user1"),
-            // other claims as needed
-        }, "mock"));
-        _controller.ControllerContext = new ControllerContext()
+            new Claim(ClaimTypes.NameIdentifier, "userId"),
+        }));
+
+        _controller.ControllerContext = new ControllerContext
         {
-            HttpContext = new DefaultHttpContext() { User = user }
+            HttpContext = new DefaultHttpContext { User = user }
         };
 
         // Act
@@ -94,7 +97,7 @@ public class CommentControllerTest
         var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(result);
         Assert.Equal("GetComment", createdAtActionResult.ActionName);
         Assert.Equal(comment, createdAtActionResult.Value);
-        _serviceMock.Verify(x => x.Save(comment, user), Times.Once);
+        _serviceMock.Verify(x => x.Save(It.IsAny<Comment>(), "userId"), Times.Once);
     }
 
     
@@ -104,7 +107,7 @@ public class CommentControllerTest
     public void Update_ReturnsBadRequest_WhenIdDoesNotMatchCommentId()
     {
         // Arrange
-        var comment = new Comment { CommentId = 1 };
+        var comment = new CommentViewModel { CommentId = 1 };
 
         // Act
         var result = _controller.Update(2, comment);
@@ -117,7 +120,7 @@ public class CommentControllerTest
     public void Update_ReturnsNotFound_WhenCommentDoesNotExist()
     {
         // Arrange
-        var comment = new Comment { CommentId = 1 };
+        var comment = new CommentViewModel { CommentId = 1 };
         _serviceMock.Setup(service => service.GetComment(comment.CommentId)).Returns((Comment)null);
 
         // Act
@@ -131,12 +134,13 @@ public class CommentControllerTest
     public void Update_ReturnsUnauthorized_WhenUserIsNotOwner()
     {
         // Arrange
-        var comment = new Comment { CommentId = 1, OwnerId = "user1" };
+        var commentViewModel = new CommentViewModel { CommentId = 1 };
+        var comment = new Comment { CommentId = commentViewModel.CommentId, OwnerId = "user1" };
         var existingComment = new Comment { CommentId = 1, OwnerId = "user2" };
         _serviceMock.Setup(service => service.GetComment(comment.CommentId)).Returns(existingComment);
 
         // Mock User
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
             new Claim(ClaimTypes.NameIdentifier, "user1"),
             // other claims as needed
@@ -147,24 +151,27 @@ public class CommentControllerTest
         };
 
         // Act
-        var result = _controller.Update(1, comment);
+        var result = _controller.Update(1, commentViewModel);
 
         // Assert
         Assert.IsType<UnauthorizedResult>(result);
     }
 
+
     [Fact]
     public void Update_ReturnsNoContent_WhenUpdateIsSuccessful()
     {
         // Arrange
-        var comment = new Comment { CommentId = 1, OwnerId = "user1" };
+        var commentViewModel = new CommentViewModel { CommentId = 1 };
+        var comment = new Comment { CommentId = commentViewModel.CommentId, OwnerId = "user1" };
         var existingComment = new Comment { CommentId = 1, OwnerId = "user1" };
         _serviceMock.Setup(service => service.GetComment(comment.CommentId)).Returns(existingComment);
 
         // Mock User
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        const string userId = "user1";
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new []
         {
-            new Claim(ClaimTypes.NameIdentifier, "user1"),
+            new Claim(ClaimTypes.NameIdentifier, userId),
             // other claims as needed
         }, "mock"));
         _controller.ControllerContext = new ControllerContext()
@@ -173,13 +180,13 @@ public class CommentControllerTest
         };
 
         // Act
-        var result = _controller.Update(1, comment);
+        var result = _controller.Update(1, commentViewModel);
 
         // Assert
         Assert.IsType<NoContentResult>(result);
-        _serviceMock.Verify(x => x.Save(comment, user), Times.Once);
+        _serviceMock.Verify(x => x.Save(It.IsAny<Comment>(), userId), Times.Once);
     }
-    
+
     
     
     // DELETE
@@ -206,7 +213,7 @@ public class CommentControllerTest
         _serviceMock.Setup(service => service.GetComment(commentId)).Returns(comment);
 
         // Mock User
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new []
         {
             new Claim(ClaimTypes.NameIdentifier, "user2"),
             // other claims as needed
@@ -232,9 +239,10 @@ public class CommentControllerTest
         _serviceMock.Setup(service => service.GetComment(commentId)).Returns(comment);
 
         // Mock User
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        const string userId = "user1";
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new []
         {
-            new Claim(ClaimTypes.NameIdentifier, "user1"),
+            new Claim(ClaimTypes.NameIdentifier, userId),
             // other claims as needed
         }, "mock"));
         _controller.ControllerContext = new ControllerContext()
@@ -247,6 +255,6 @@ public class CommentControllerTest
 
         // Assert
         Assert.IsType<NoContentResult>(result);
-        _serviceMock.Verify(x => x.Delete(commentId, user), Times.Once);
+        _serviceMock.Verify(x => x.Delete(commentId, userId), Times.Once);
     }
 }

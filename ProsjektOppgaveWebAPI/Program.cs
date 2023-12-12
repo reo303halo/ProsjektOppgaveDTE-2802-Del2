@@ -23,8 +23,10 @@ services.AddCors(options =>
 });
 
 services.AddControllers();
+services.AddHttpContextAccessor();
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
+
 
 // Db Connection
 services.AddDbContext<BlogDbContext>(options => 
@@ -33,6 +35,8 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.Sign
     .AddEntityFrameworkStores<BlogDbContext>()
     .AddDefaultTokenProviders();
 
+
+// Jwt Authentication
 services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -58,8 +62,8 @@ services.AddAuthentication(options =>
         };
     });
 
-//services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 
+// Interfaces
 services.AddTransient<IAuthService, AuthService>();
 services.AddTransient<IBlogService, BlogService>();
 services.AddTransient<ICommentService, CommentService>();

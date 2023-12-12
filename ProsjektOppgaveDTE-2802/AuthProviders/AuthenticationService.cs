@@ -2,10 +2,11 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
+using ProsjektOppgaveBlazor.AuthProviders;
 using ProsjektOppgaveBlazor.data.Models.ViewModel;
 using RegisterResponse = ProsjektOppgaveBlazor.data.Models.ViewModel.RegisterResponse;
 
-namespace ProsjektOppgaveBlazor.AuthProviders;
+namespace ProsjektOppgaveDTE_2802.AuthProviders;
 
 public class AuthenticationService : IAuthenticationService
 {
@@ -21,12 +22,10 @@ public class AuthenticationService : IAuthenticationService
         _localStorageService = localStorageService;
         _serializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
     }
-
-
     
     public async Task<LoginResponse> Login(LoginViewModel loginViewModel)
     {
-        var authResult = await _httpClient.PostAsJsonAsync("https://localhost:7022/api/Auth/login", loginViewModel);
+        var authResult = await _httpClient.PostAsJsonAsync("https://localhost:7022/api/Auth/Login", loginViewModel);
         var authContent = await authResult.Content.ReadAsStringAsync();
         var jsonAuthContent = JsonSerializer.Deserialize<LoginResponse>(authContent, _serializerOptions);
         

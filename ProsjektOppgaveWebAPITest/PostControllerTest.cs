@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using ProsjektOppgaveWebAPI.Controllers;
 using ProsjektOppgaveWebAPI.Models;
+using ProsjektOppgaveWebAPI.Models.ViewModel;
 using ProsjektOppgaveWebAPI.Services;
 
 namespace ProsjektOppgaveWebAPITest;
@@ -42,7 +43,7 @@ public class PostControllerTest
     public void GetPost_ReturnsExpectedPost()
     {
         // Arrange
-        var postId = 1;
+        const int postId = 1;
         var expectedPost = new Post();
         _serviceMock.Setup(service => service.GetPost(postId)).Returns(expectedPost);
 
@@ -64,7 +65,7 @@ public class PostControllerTest
         _controller.ModelState.AddModelError("error", "some error");
 
         // Act
-        var result = await _controller.Create(new Post());
+        var result = await _controller.Create(new PostViewModel());
 
         // Assert
         Assert.IsType<BadRequestObjectResult>(result);
@@ -74,7 +75,7 @@ public class PostControllerTest
     public async Task Create_ReturnsBadRequest_WhenBlogIsClosed()
     {
         // Arrange
-        var post = new Post { BlogId = 1 };
+        var post = new PostViewModel { BlogId = 1 };
         var blog = new Blog { Status = 1 };
         _serviceMock.Setup(service => service.GetBlog(post.BlogId)).Returns(blog);
 
@@ -89,9 +90,22 @@ public class PostControllerTest
     public async Task Create_ReturnsCreatedAtAction_WhenModelStateIsValidAndBlogIsOpen()
     {
         // Arrange
-        var post = new Post { BlogId = 1 };
+        var post = new PostViewModel { BlogId = 1 };
         var blog = new Blog { Status = 0 };
         _serviceMock.Setup(service => service.GetBlog(post.BlogId)).Returns(blog);
+
+        var newPost = new Post { BlogId = post.BlogId };
+
+        // Mock User
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, "userId"),
+        }));
+
+        _controller.ControllerContext = new ControllerContext()
+        {
+            HttpContext = new DefaultHttpContext() { User = user }
+        };
 
         // Act
         var result = await _controller.Create(post);
@@ -100,7 +114,7 @@ public class PostControllerTest
         var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(result);
         Assert.Equal("GetPosts", createdAtActionResult.ActionName);
         Assert.Equal(post, createdAtActionResult.Value);
-        _serviceMock.Verify(x => x.SavePost(post, It.IsAny<ClaimsPrincipal>()), Times.Once);
+        _serviceMock.Verify(x => x.SavePost(It.IsAny<Post>(), "userId"), Times.Once);
     }
 
     
@@ -110,7 +124,7 @@ public class PostControllerTest
     public void Update_ReturnsBadRequest_WhenIdDoesNotMatchPostId()
     {
         // Arrange
-        var post = new Post { PostId = 1 };
+        var post = new PostViewModel { PostId = 1 };
 
         // Act
         var result = _controller.Update(2, post);
@@ -123,7 +137,7 @@ public class PostControllerTest
     public void Update_ReturnsNotFound_WhenPostDoesNotExist()
     {
         // Arrange
-        var post = new Post { PostId = 1 };
+        var post = new PostViewModel { PostId = 1 };
         _serviceMock.Setup(service => service.GetPost(post.PostId)).Returns((Post)null);
 
         // Act
@@ -137,12 +151,13 @@ public class PostControllerTest
     public void Update_ReturnsUnauthorized_WhenUserIsNotOwner()
     {
         // Arrange
-        var post = new Post { PostId = 1, OwnerId = "user1" };
+        var postViewModel = new PostViewModel { PostId = 1 };
+        var post = new Post { PostId = postViewModel.PostId, OwnerId = "user1" };
         var existingPost = new Post { PostId = 1, OwnerId = "user2" };
         _serviceMock.Setup(service => service.GetPost(post.PostId)).Returns(existingPost);
 
         // Mock User
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
             new Claim(ClaimTypes.NameIdentifier, "user1"),
             // other claims as needed
@@ -153,7 +168,7 @@ public class PostControllerTest
         };
 
         // Act
-        var result = _controller.Update(1, post);
+        var result = _controller.Update(1, postViewModel);
 
         // Assert
         Assert.IsType<UnauthorizedResult>(result);
@@ -163,14 +178,16 @@ public class PostControllerTest
     public void Update_ReturnsNoContent_WhenUpdateIsSuccessful()
     {
         // Arrange
-        var post = new Post { PostId = 1, OwnerId = "user1" };
+        var postViewModel = new PostViewModel { PostId = 1 };
+        var post = new Post { PostId = postViewModel.PostId, OwnerId = "user1" };
         var existingPost = new Post { PostId = 1, OwnerId = "user1" };
         _serviceMock.Setup(service => service.GetPost(post.PostId)).Returns(existingPost);
 
         // Mock User
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        const string userId = "user1";
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, "user1"),
+            new Claim(ClaimTypes.NameIdentifier, userId),
             // other claims as needed
         }, "mock"));
         _controller.ControllerContext = new ControllerContext()
@@ -179,11 +196,11 @@ public class PostControllerTest
         };
 
         // Act
-        var result = _controller.Update(1, post);
+        var result = _controller.Update(1, postViewModel);
 
         // Assert
         Assert.IsType<NoContentResult>(result);
-        _serviceMock.Verify(x => x.SavePost(post, user), Times.Once);
+        _serviceMock.Verify(x => x.SavePost(It.IsAny<Post>(), userId), Times.Once);
     }
     
     
@@ -193,7 +210,7 @@ public class PostControllerTest
     public void Delete_ReturnsNotFound_WhenPostDoesNotExist()
     {
         // Arrange
-        var postId = 1;
+        const int postId = 1;
         _serviceMock.Setup(service => service.GetPost(postId)).Returns((Post)null);
 
         // Act
@@ -207,12 +224,12 @@ public class PostControllerTest
     public void Delete_ReturnsUnauthorized_WhenUserIsNotOwner()
     {
         // Arrange
-        var postId = 1;
+        const int postId = 1;
         var post = new Post { PostId = postId, OwnerId = "user1" };
         _serviceMock.Setup(service => service.GetPost(postId)).Returns(post);
 
         // Mock User
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
             new Claim(ClaimTypes.NameIdentifier, "user2"),
             // other claims as needed
@@ -233,14 +250,15 @@ public class PostControllerTest
     public void Delete_ReturnsNoContent_WhenDeleteIsSuccessful()
     {
         // Arrange
-        var postId = 1;
+        const int postId = 1;
         var post = new Post { PostId = postId, OwnerId = "user1" };
         _serviceMock.Setup(service => service.GetPost(postId)).Returns(post);
 
         // Mock User
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        const string userId = "user1";
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, "user1"),
+            new Claim(ClaimTypes.NameIdentifier, userId),
             // other claims as needed
         }, "mock"));
         _controller.ControllerContext = new ControllerContext()
@@ -253,6 +271,6 @@ public class PostControllerTest
 
         // Assert
         Assert.IsType<NoContentResult>(result);
-        _serviceMock.Verify(x => x.DeletePost(postId, user), Times.Once);
+        _serviceMock.Verify(x => x.DeletePost(postId, userId), Times.Once);
     }
 }

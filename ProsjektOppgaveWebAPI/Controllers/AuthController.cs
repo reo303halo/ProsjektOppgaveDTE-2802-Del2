@@ -41,9 +41,10 @@ public class AuthController : ControllerBase
         
         var identityUser = await _userManager.FindByNameAsync(user.Username);
         
-        var tokenString = _authService.GenerateTokenString(identityUser);
-        return Ok(tokenString);
+        return Ok(new
+        {
+            success = true,
+            token = _authService.GenerateTokenString(identityUser)
+        });
     }
-
-
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using ProsjektOppgaveBlazor.AuthProviders;
+using ProsjektOppgaveDTE_2802.AuthProviders;
 using ProsjektOppgaveDTE_2802.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,7 @@ builder.Services.AddAuthenticationCore();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient("BlogHttpClient", client => client.BaseAddress = new Uri("https://localhost:7115"));
 
 var app = builder.Build();

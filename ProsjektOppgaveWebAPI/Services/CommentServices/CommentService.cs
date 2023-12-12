@@ -1,4 +1,3 @@
-using System.Security.Principal;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProsjektOppgaveWebAPI.Data;
@@ -11,7 +10,6 @@ public class CommentService : ICommentService
 {
     private readonly BlogDbContext _db;
     private readonly UserManager<IdentityUser> _manager;
-    private CommentViewModel _commentViewModel;
     
     public CommentService(UserManager<IdentityUser> userManager, BlogDbContext db)
     {

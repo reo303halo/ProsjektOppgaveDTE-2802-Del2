@@ -20,11 +20,8 @@
 @* <input type="button" class="btn btn-primary" value="Login" @onclick="() => BlazorService.LoginUser(userName, password)" /> *@
 
 
-
 @code {
-
     private LoginViewModel loginViewModel = new LoginViewModel();
-    
     
     
     private bool ShowError { get; set; }
@@ -35,7 +32,6 @@
 
     private async Task HandleRegistration()
     {
-        
         ShowError = false;
         
         var result = await AuthenticationService.Login(loginViewModel);
@@ -44,15 +40,5 @@
         {
             NavigationManager.NavigateTo("/");
         }
-        
-
-
-
     }
-    
-    
-
-
-
-
 }

@@ -1,4 +1,3 @@
-using System.Security.Principal;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProsjektOppgaveWebAPI.Data;
@@ -11,9 +10,6 @@ public class BlogService : IBlogService
 {
     private readonly BlogDbContext _db;
     private readonly UserManager<IdentityUser> _manager;
-    private BlogViewModel _viewModel;
-    private PostViewModel _postViewModel;
-    private CommentViewModel _commentViewModel;
 
     public BlogService(UserManager<IdentityUser> userManager, BlogDbContext db)
     {

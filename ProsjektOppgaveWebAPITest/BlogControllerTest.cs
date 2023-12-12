@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using ProsjektOppgaveWebAPI.Controllers;
 using ProsjektOppgaveWebAPI.Models;
+using ProsjektOppgaveWebAPI.Models.ViewModel;
 using ProsjektOppgaveWebAPI.Services;
 
 namespace ProsjektOppgaveWebAPITest;
@@ -112,7 +113,7 @@ public class BlogControllerTest
         _controller.ModelState.AddModelError("error", "some error");
 
         // Act
-        var result = await _controller.Create(new Blog());
+        var result = await _controller.Create(new BlogViewModel());
 
         // Assert
         Assert.IsType<BadRequestObjectResult>(result);
@@ -122,19 +123,33 @@ public class BlogControllerTest
     public async Task Create_ReturnsCreatedAtAction_WhenSuccessful()
     {
         // Arrange
-        var blog = new Blog { BlogId = 1 };
-        _mockService.Setup(service => service.Save(blog, It.IsAny<ClaimsPrincipal>()))
+        var blogViewModel = new BlogViewModel { BlogId = 1 };
+        var blog = new Blog { BlogId = blogViewModel.BlogId };
+
+        // Mock User
+        const string userId = "user1";
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new []
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId),
+            // other claims as needed
+        }, "mock"));
+        _controller.ControllerContext = new ControllerContext()
+        {
+            HttpContext = new DefaultHttpContext() { User = user }
+        };
+
+        _mockService.Setup(service => service.Save(blog, userId))
             .Returns(Task.CompletedTask);
 
         // Act
-        var result = await _controller.Create(blog);
+        var result = await _controller.Create(blogViewModel);
 
         // Assert
         var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(result);
         Assert.Equal("Get", createdAtActionResult.ActionName);
-        Assert.Equal(blog, createdAtActionResult.Value);
+        Assert.Equal(blogViewModel, createdAtActionResult.Value);
     }
-
+    
     
     
     // PUT
@@ -142,7 +157,7 @@ public class BlogControllerTest
     public async Task Update_ReturnsBadRequest_WhenIdDoesNotMatchBlogId()
     {
         // Arrange
-        var blog = new Blog { BlogId = 1 };
+        var blog = new BlogViewModel { BlogId = 1 };
 
         // Act
         var result = await _controller.Update(2, blog);
@@ -155,12 +170,12 @@ public class BlogControllerTest
     public async Task Update_ReturnsNotFound_WhenBlogDoesNotExist()
     {
         // Arrange
-        var blog = new Blog { BlogId = 1 };
+        var blogViewModel = new BlogViewModel { BlogId = 1 };
         _mockService.Setup(service => service.GetBlog(It.IsAny<int>()))
             .Returns((Blog)null);
 
         // Act
-        var result = await _controller.Update(1, blog);
+        var result = await _controller.Update(1, blogViewModel);
 
         // Assert
         Assert.IsType<NotFoundResult>(result);
@@ -171,14 +186,15 @@ public class BlogControllerTest
     {
         // Arrange
         const string userId = "otherUserId";
-        var blog = new Blog { BlogId = 1, Owner = new IdentityUser { Id = userId, UserName = "otherUser" } };
+        var blogViewModel = new BlogViewModel { BlogId = 1 };
+        var blog = new Blog { BlogId = blogViewModel.BlogId, Owner = new IdentityUser { Id = userId, UserName = "otherUser" } };
         _mockService.Setup(service => service.GetBlog(It.IsAny<int>()))
             .Returns(blog);
         _controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext 
             { 
-                User = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] 
+                User = new ClaimsPrincipal(new ClaimsIdentity(new [] 
                 {
                     new Claim(ClaimTypes.NameIdentifier, "testUserId")
                 })) 
@@ -186,38 +202,43 @@ public class BlogControllerTest
         };
 
         // Act
-        var result = await _controller.Update(1, blog);
+        var result = await _controller.Update(1, blogViewModel);
 
         // Assert
         Assert.IsType<UnauthorizedResult>(result);
     }
-
-
+    
     [Fact]
     public async Task Update_ReturnsNoContent_WhenSuccessful()
     {
         // Arrange
-        var blog = new Blog { BlogId = 1, Owner = new IdentityUser { UserName = "testUser" } };
+        var blogViewModel = new BlogViewModel { BlogId = 1 };
+        const string userId = "testUserId";
+        var blog = new Blog { BlogId = blogViewModel.BlogId, OwnerId = userId };
+
         _mockService.Setup(service => service.GetBlog(It.IsAny<int>()))
             .Returns(blog);
-        _mockService.Setup(service => service.Save(blog, It.IsAny<ClaimsPrincipal>()))
-            .Returns(Task.CompletedTask);
-        _controller.ControllerContext = new ControllerContext
+
+        // Mock User
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new []
         {
-            HttpContext = new DefaultHttpContext 
-            { 
-                User = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] 
-                {
-                    new Claim(ClaimTypes.Name, "testUser")
-                })) 
-            }
+            new Claim(ClaimTypes.NameIdentifier, userId),
+            // other claims as needed
+        }, "mock"));
+        _controller.ControllerContext = new ControllerContext()
+        {
+            HttpContext = new DefaultHttpContext { User = user }
         };
 
+        _mockService.Setup(service => service.Save(It.IsAny<Blog>(), userId))
+            .Returns(Task.CompletedTask);
+
         // Act
-        var result = await _controller.Update(1, blog);
+        var result = await _controller.Update(1, blogViewModel);
 
         // Assert
         Assert.IsType<NoContentResult>(result);
+        _mockService.Verify(x => x.Save(It.IsAny<Blog>(), userId), Times.Once);
     }
     
     
@@ -248,7 +269,7 @@ public class BlogControllerTest
         {
             HttpContext = new DefaultHttpContext 
             { 
-                User = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] 
+                User = new ClaimsPrincipal(new ClaimsIdentity(new [] 
                 {
                     new Claim(ClaimTypes.NameIdentifier, "testUserId")
                 })) 
@@ -269,23 +290,28 @@ public class BlogControllerTest
         var blog = new Blog { BlogId = 1, OwnerId = "testUserId" };
         _mockService.Setup(service => service.GetBlog(It.IsAny<int>()))
             .Returns(blog);
-        _mockService.Setup(service => service.Delete(It.IsAny<int>(), It.IsAny<ClaimsPrincipal>()))
-            .Returns(Task.CompletedTask);
+
+        // Mock User
+        const string userId = "testUserId";
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new []
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId),
+            // other claims as needed
+        }, "mock"));
         _controller.ControllerContext = new ControllerContext
         {
-            HttpContext = new DefaultHttpContext 
-            { 
-                User = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] 
-                {
-                    new Claim(ClaimTypes.NameIdentifier, "testUserId")
-                })) 
-            }
+            HttpContext = new DefaultHttpContext() { User = user }
         };
+
+        _mockService.Setup(service => service.Delete(It.IsAny<int>(), userId))
+            .Returns(Task.CompletedTask);
 
         // Act
         var result = _controller.Delete(1);
 
         // Assert
         Assert.IsType<NoContentResult>(result);
+        _mockService.Verify(x => x.Delete(1, userId), Times.Once);
     }
+
 }
