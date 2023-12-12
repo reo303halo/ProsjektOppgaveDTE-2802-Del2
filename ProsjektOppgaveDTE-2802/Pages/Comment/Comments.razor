@@ -41,11 +41,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        comments = await BlogHttpClient.GetFromJsonAsync<Comment[]>($"https://localhost:7022/Comment?postId={PostId}");
+        comments = await BlogHttpClient.GetFromJsonAsync<Comment[]>($"https://localhost:7022/api/Comment?postId={PostId}");
     }
 
     private async Task DeleteBlog(int id)
     {
-        var response = await BlogHttpClient.DeleteAsync($"https://localhost:7022/Comment/{id}");
+        var response = await BlogHttpClient.DeleteAsync($"https://localhost:7022/api/Comment/{id}");
     }
 }

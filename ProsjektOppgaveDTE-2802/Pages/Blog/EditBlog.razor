@@ -100,12 +100,12 @@ else
     private Blog blog;
     protected override async Task OnInitializedAsync()
     {
-        blog = await BlogHttpClient.GetFromJsonAsync<Blog>($"https://localhost:7022/Blog/{BlogId}");
+        blog = await BlogHttpClient.GetFromJsonAsync<Blog>($"https://localhost:7022/api/Blog/{BlogId}");
     }
 
     private async Task Save()
     {
-        var response = await BlogHttpClient.PutAsJsonAsync($"https://localhost:7022/Blog/{BlogId}", blog);
+        var response = await BlogHttpClient.PutAsJsonAsync($"https://localhost:7022/api/Blog/{BlogId}", blog);
     }
 
 }

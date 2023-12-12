@@ -40,11 +40,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        blogs = await BlogHttpClient.GetFromJsonAsync<Blog[]>("https://localhost:7022/Blog");
+        blogs = await BlogHttpClient.GetFromJsonAsync<Blog[]>("https://localhost:7022/api/Blog");
     }
 
     private async Task DeleteBlog(int id)
     {
-        var response = await BlogHttpClient.DeleteAsync($"https://localhost:7022/Blog/{id}");
+        var response = await BlogHttpClient.DeleteAsync($"https://localhost:7022/api/Blog/{id}");
     }
 }

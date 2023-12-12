@@ -31,8 +31,8 @@ public class BlogDbContext : IdentityDbContext<IdentityUser>
         
         var adminUser = new IdentityUser
         {
-            UserName = "admin",
-            NormalizedUserName = "ADMIN",
+            UserName = "admin@example.com",
+            NormalizedUserName = "ADMIN@EXAMPLE.COM",
             Email = "admin@example.com",
             NormalizedEmail = "ADMIN@EXAMPLE.COM",
             EmailConfirmed = true,

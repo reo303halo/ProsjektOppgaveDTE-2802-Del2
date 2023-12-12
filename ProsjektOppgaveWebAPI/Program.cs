@@ -5,9 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ProsjektOppgaveWebAPI.Data;
 using ProsjektOppgaveWebAPI.Services;
+using ProsjektOppgaveWebAPI.Services.AuthServices;
 using ProsjektOppgaveWebAPI.Services.CommentServices;
-using ProsjektOppgaveWebAPI.Services.JwtServices;
-using ProsjektOppgaveWebAPI.Services.JwtServices.Models;
 using ProsjektOppgaveWebAPI.Services.TagServices;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,20 +43,24 @@ services.AddAuthentication(options =>
     {
         options.RequireHttpsMetadata = false;
 
-        var byteKey = Encoding.UTF8.GetBytes(builder.Configuration.GetSection("JwtOptions:Key").Value);
+        var byteKey = Encoding.UTF8.GetBytes(builder.Configuration.GetSection("Jwt:Key").Value);
 
-        options.TokenValidationParameters = new TokenValidationParameters()
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            IssuerSigningKey = new SymmetricSecurityKey(byteKey),
-            ValidateIssuerSigningKey = true
+            ValidateActor = true,
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            RequireExpirationTime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration.GetSection("Jwt:Issuer").Value,
+            ValidAudience = builder.Configuration.GetSection("Jwt:Audience").Value,
+            IssuerSigningKey = new SymmetricSecurityKey(byteKey)
         };
     });
 
-services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
+//services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 
-services.AddTransient<IJwtService, JwtService>();
+services.AddTransient<IAuthService, AuthService>();
 services.AddTransient<IBlogService, BlogService>();
 services.AddTransient<ICommentService, CommentService>();
 services.AddTransient<ITagService, TagService>();

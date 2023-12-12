@@ -38,12 +38,12 @@ else
     private Comment comment;
     protected override async Task OnInitializedAsync()
     {
-        comment = await BlogHttpClient.GetFromJsonAsync<Comment>($"https://localhost:7022/Comment/{CommentId}");
+        comment = await BlogHttpClient.GetFromJsonAsync<Comment>($"https://localhost:7022/api/Comment/{CommentId}");
     }
     
     private async Task Save()
     {
-        var response = await BlogHttpClient.PutAsJsonAsync($"https://localhost:7022/Comment/{CommentId}", comment);
+        var response = await BlogHttpClient.PutAsJsonAsync($"https://localhost:7022/api/Comment/{CommentId}", comment);
     }
 
 }

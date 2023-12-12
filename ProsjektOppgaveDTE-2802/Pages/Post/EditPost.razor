@@ -44,7 +44,7 @@ else
     private Post post;
     protected override async Task OnInitializedAsync()
     {
-        post = await BlogHttpClient.GetFromJsonAsync<Post>($"https://localhost:7022/Post/{PostId}");
+        post = await BlogHttpClient.GetFromJsonAsync<Post>($"https://localhost:7022/api/Post/{PostId}");
     }
 
     private async Task Save()
@@ -72,7 +72,7 @@ else
 
 
         };
-        var response = await BlogHttpClient.PutAsJsonAsync($"https://localhost:7022/Post/{PostId}", post);
+        var response = await BlogHttpClient.PutAsJsonAsync($"https://localhost:7022/api/Post/{PostId}", post);
        
         
     }

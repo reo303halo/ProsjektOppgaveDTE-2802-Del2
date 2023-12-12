@@ -74,7 +74,7 @@ else
     private async Task Save()
     {
 
-        var response = await BlogHttpClient.PostAsJsonAsync("https://localhost:7022/Blog", blog);
+        var response = await BlogHttpClient.PostAsJsonAsync("https://localhost:7022/api/Blog", blog);
 
     }
 

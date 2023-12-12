@@ -48,9 +48,9 @@ public class CommentService : ICommentService
         return c;
     }
     
-    public async Task Save(Comment comment, IPrincipal principal)
+    public async Task Save(Comment comment, string userId)
     {
-        var user = await _manager.FindByNameAsync(principal.Identity.Name);
+        var user = await _manager.FindByIdAsync(userId);
 
         var existingComment = _db.Comment.Find(comment.CommentId);
         if (existingComment != null)
@@ -67,9 +67,9 @@ public class CommentService : ICommentService
         _db.SaveChanges();
     }
     
-    public async Task Delete(int id, IPrincipal principal)
+    public async Task Delete(int id, string userId)
     {
-        var user = await _manager.FindByNameAsync(principal.Identity.Name);
+        var user = await _manager.FindByIdAsync(userId);
         var comment = _db.Comment.Find(id);
         
         if (comment.Owner == user)
@@ -82,19 +82,4 @@ public class CommentService : ICommentService
             throw new UnauthorizedAccessException("You are not the owner of this post.");
         }
     }
-    
-    public CommentViewModel GetCommentViewModel(int id)
-    {
-        var comment = _db.Comment.Find(id);
-        if (comment == null) return null;
-    
-        _commentViewModel = new CommentViewModel
-        {
-            CommentId = comment.CommentId,
-            PostId = comment.PostId,
-            Text = comment.Text
-        };
-        return _commentViewModel;
-    }
-    
 }

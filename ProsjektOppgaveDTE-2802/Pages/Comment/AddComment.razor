@@ -44,7 +44,7 @@ else
     private async Task Save()
     {
 
-        var response = await BlogHttpClient.PostAsJsonAsync("https://localhost:7022/Comment", comment);
+        var response = await BlogHttpClient.PostAsJsonAsync("https://localhost:7022/api/Comment", comment);
     }
 
 }

@@ -52,12 +52,12 @@ public class BlogService : IBlogService
         return b;
     }
  
-    public async Task Save(Blog blog, IPrincipal principal)
+    public async Task Save(Blog blog, string userId)
     {
-        var user = await _manager.FindByNameAsync(principal.Identity?.Name);
+        var user = await _manager.FindByIdAsync(userId);
         if (user == null)
         {
-            throw new ArgumentNullException(nameof(principal), "User not found");
+            throw new ArgumentNullException(nameof(userId), "User ID cannot be null.");
         }
 
         var existingBlog = _db.Blog.Find(blog.BlogId);
@@ -75,9 +75,9 @@ public class BlogService : IBlogService
         await _db.SaveChangesAsync();
     }
     
-    public async Task Delete(int id, IPrincipal principal)
+    public async Task Delete(int id, string userId)
     {
-        var user = await _manager.FindByNameAsync(principal.Identity.Name);
+        var user = await _manager.FindByIdAsync(userId);
         var blog = _db.Blog.Find(id);
 
         if (blog.Owner == user)
@@ -89,26 +89,6 @@ public class BlogService : IBlogService
         {
             throw new UnauthorizedAccessException("You are not the owner of this blog.");
         }
-    }
-
-    public BlogViewModel GetBlogViewModel()
-    {
-        _viewModel = new BlogViewModel();
-        return _viewModel;
-    }
-
-    public BlogViewModel GetBlogViewModel(int id)
-    {
-        var blog = _db.Blog.Find(id);
-        if (blog == null) return null;
-        
-        _viewModel = new BlogViewModel
-        {
-            BlogId = blog.BlogId,
-            Name = blog.Name,
-            Status = blog.Status
-        };
-        return _viewModel;
     }
     
     
@@ -143,9 +123,9 @@ public class BlogService : IBlogService
         }
     }
     
-    public async Task SavePost(Post post, IPrincipal principal)
+    public async Task SavePost(Post post, string userId)
     {
-        var user = await _manager.FindByNameAsync(principal.Identity.Name);
+        var user = await _manager.FindByIdAsync(userId);
 
         var existingPost = _db.Post.Find(post.PostId);
         if (existingPost != null)
@@ -162,9 +142,9 @@ public class BlogService : IBlogService
         await _db.SaveChangesAsync();
     }
 
-    public async Task DeletePost(int id, IPrincipal principal)
+    public async Task DeletePost(int id, string userId)
     {
-        var user = await _manager.FindByNameAsync(principal.Identity.Name);
+        var user = await _manager.FindByIdAsync(userId);
         var post = _db.Post.Find(id);
         
         if (post.Owner == user)
@@ -176,26 +156,5 @@ public class BlogService : IBlogService
         {
             throw new UnauthorizedAccessException("You are not the owner of this post.");
         }
-    }
-    
-    public PostViewModel GetPostViewModel()
-    {
-        _postViewModel = new PostViewModel();
-        return _postViewModel;
-    }
-
-    public PostViewModel GetPostViewModel(int id)
-    {
-        var post = _db.Post.Find(id);
-        if (post == null) return null;
-    
-        _postViewModel = new PostViewModel
-        {
-            PostId = post.PostId,
-            Title = post.Title,
-            Content = post.Content,
-            BlogId = post.BlogId
-        };
-        return _postViewModel;
     }
 }

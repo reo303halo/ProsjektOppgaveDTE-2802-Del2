@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProsjektOppgaveWebAPI.Models;
+using ProsjektOppgaveWebAPI.Models.ViewModel;
 using ProsjektOppgaveWebAPI.Services;
 
 namespace ProsjektOppgaveWebAPI.Controllers;
@@ -43,22 +44,29 @@ public class BlogController : ControllerBase
 
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] Blog blog)
+    public async Task<IActionResult> Create([FromBody] BlogViewModel blog)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
-        
-        await _service.Save(blog, User);
 
+        var newBlog = new Blog
+        {
+            Name = blog.Name,
+            Status = blog.Status
+        };
+        
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        await _service.Save(newBlog, userId);
         return CreatedAtAction("Get", new { id = blog.BlogId }, blog);
     }
 
 
     [Authorize]
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] Blog blog)
+    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] BlogViewModel blog)
     {
         if (id != blog.BlogId)
             return BadRequest();
@@ -74,8 +82,14 @@ public class BlogController : ControllerBase
             return Unauthorized();
         }
         
-        await _service.Save(blog, User);
-
+        var newBlog = new Blog
+        {
+            BlogId = blog.BlogId,
+            Name = blog.Name,
+            Status = blog.Status
+        };
+        
+        await _service.Save(newBlog, userId);
         return NoContent();
     }
 
@@ -94,8 +108,7 @@ public class BlogController : ControllerBase
             return Unauthorized();
         }
 
-        _service.Delete(id, User);
-
+        _service.Delete(id, userId);
         return NoContent();
     }
 }
