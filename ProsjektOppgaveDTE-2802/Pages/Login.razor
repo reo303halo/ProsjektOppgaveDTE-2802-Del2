@@ -1,44 +1,64 @@
 @page "/login"
-
 @inject IAuthenticationService AuthenticationService
 @inject NavigationManager NavigationManager
+@using ProsjektOppgaveDTE_2802.AuthProviders
+@using ProsjektOppgaveDTE_2802.Models.ViewModel
 
-@using ProsjektOppgaveBlazor.data.Models.ViewModel
-@using ProsjektOppgaveBlazor.AuthProviders
+<PageTitle>Login</PageTitle>
 
-<PageTitle>Register</PageTitle>
-<h3>Register</h3>
-<input type="text" class="form-control" @bind="loginViewModel.Username">Username</input>
-<input type="password" class="form-control" @bind="loginViewModel.Password">Password</input>
-<p>Username: @userName</p>
-<p>Password: @password</p>
-
-<p>Error: @Error</p>
-
-
-<input type="button" class="btn btn-primary" value="Register" @onclick="HandleRegistration" />
 @* <input type="button" class="btn btn-primary" value="Login" @onclick="() => BlazorService.LoginUser(userName, password)" /> *@
 
+<div class="row">
+    <div class="col-md-4">
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h4>Login</h4>
+            </div>
+            <div class="card-body">
+                <input type="email" class="form-control" placeholder="Email" @bind="_loginViewModel.Username"/><br/>
+                <input type="@_passwordFieldType" class="form-control" placeholder="Password" @bind="_loginViewModel.Password"/><br/>
+                <input type="checkbox" @onclick="TogglePasswordVisibility"> Show Password<br/>
+                @if (ShowError)
+                {
+                    <p class="text-danger">@Error</p>
+                }
+            </div>
+            <div class="card-footer">
+                <input type="button" class="btn btn-success" value="Log In" @onclick="HandleRegistration"/>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4"></div>
+</div>
 
 @code {
-    private LoginViewModel loginViewModel = new LoginViewModel();
-    
+    private readonly LoginViewModel _loginViewModel = new();
+    private string _passwordFieldType = "password";
     
     private bool ShowError { get; set; }
     private string Error { get; set; }
-    private string userName { get; set; }
-    private string email { get; set; }
-    private string password { get; set; }
+    
+    private void TogglePasswordVisibility()
+    {
+        _passwordFieldType = _passwordFieldType == "password" ? "text" : "password";
+    }
 
     private async Task HandleRegistration()
     {
         ShowError = false;
         
-        var result = await AuthenticationService.Login(loginViewModel);
+        var result = await AuthenticationService.Login(_loginViewModel);
 
-        if (result.success)
+        if (result.IsSuccess)
         {
             NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            ShowError = true;
+            Error = result.Message;
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿@page "/logout"
-@using ProsjektOppgaveBlazor.AuthProviders
+@using ProsjektOppgaveDTE_2802.AuthProviders
 
 @inject IAuthenticationService AuthenticationService
 @inject NavigationManager NavigationManager
@@ -11,5 +11,4 @@
         await AuthenticationService.Logout();
         NavigationManager.NavigateTo("/");
     }
-    
 }

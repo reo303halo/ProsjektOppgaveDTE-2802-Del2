@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
+using ProsjektOppgaveDTE_2802.Models;
 
-namespace ProsjektOppgaveBlazor.data.Models;
+namespace ProsjektOppgaveDTE_2802.Models;
 
 public class Post
 {

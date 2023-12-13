@@ -1,8 +1,6 @@
 @page "/registration"
-@using Newtonsoft.Json
-@using System.Text
-@using ProsjektOppgaveBlazor.data.Models.ViewModel
-@using ProsjektOppgaveBlazor.AuthProviders
+@using ProsjektOppgaveDTE_2802.AuthProviders
+@using ProsjektOppgaveDTE_2802.Models.ViewModel
 @inject IAuthenticationService AuthenticationService
 @inject NavigationManager NavigationManager
 
@@ -15,9 +13,14 @@
                 <h4>Registration</h4>
             </div>
             <div class="card-body">
-                <input type="text" class="form-control" placeholder="username" @bind="RegisterViewModel.username"/><br/>
-                <input type="email" class="form-control" placeholder="email" @bind="RegisterViewModel.email"/>
-                <input type="password" class="form-control" placeholder="password" @bind="RegisterViewModel.password"/><br/>
+                <input type="text" class="form-control" placeholder="email" @bind="_loginViewModel.Username"/><br/>
+                <input type="@_passwordFieldType" class="form-control" placeholder="password" @bind="_loginViewModel.Password"/><br/>
+                <input type="@_passwordFieldType" class="form-control" placeholder="confirm password" @bind="ConfirmPassword"/><br/>
+                <input type="checkbox" @onclick="TogglePasswordVisibility"> Show Password<br/>
+                @if (ShowError)
+                {
+                    <p class="text-danger">@Error</p>
+                }
             </div>
             <div class="card-footer">
                 <input type="button" class="btn btn-success" value="Sign Up" @onclick="HandleRegistration"/>
@@ -27,32 +30,39 @@
     <div class="col-md-4"></div>
 </div>
 
-
 @code {
-    private RegisterViewModel RegisterViewModel = new RegisterViewModel();
+    private readonly LoginViewModel _loginViewModel = new();
+    private string _passwordFieldType = "password";
+    private string ConfirmPassword { get; set; } = string.Empty;
     
     private bool ShowError { get; set; }
-    private string Error { get;set; }
-    private string userName { get; set; }
-    private string email { get; set; }
-    private string password { get; set; }
+    private string Error { get; set; }
+    
+    private void TogglePasswordVisibility()
+    {
+        _passwordFieldType = _passwordFieldType == "password" ? "text" : "password";
+    }
 
     private async Task HandleRegistration()
     {
         ShowError = false;
+        if (_loginViewModel.Password != ConfirmPassword)
+        {
+            ShowError = true;
+            Error = "Passwords do not match.";
+            return;
+        }
         
-        var result = await AuthenticationService.RegisterUser(RegisterViewModel);
+        var result = await AuthenticationService.RegisterUser(_loginViewModel);
 
-        if (result.success)
+        if (result.IsSuccess)
         {
             NavigationManager.NavigateTo("/login");
         }
         else
         {
-            Error = result.message;
             ShowError = true;
+            Error = result.Message;
         }
     }
-    
-
 }
