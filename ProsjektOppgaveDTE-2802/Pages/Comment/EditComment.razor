@@ -1,8 +1,4 @@
-﻿
-@page "/comment/{CommentId:int}"
-@using ProsjektOppgaveDTE_2802.Models
-@using Microsoft.AspNetCore.Identity
-@inject HttpClient BlogHttpClient
+﻿@page "/comment/{CommentId:int}"
 
 <h3>Edit comment</h3>
 
@@ -38,12 +34,11 @@ else
     private Comment comment;
     protected override async Task OnInitializedAsync()
     {
-        comment = await BlogHttpClient.GetFromJsonAsync<Comment>($"https://localhost:7022/api/Comment/{CommentId}");
+        comment = await HttpClient.GetFromJsonAsync<Comment>($"/api/Comment/{CommentId}");
     }
     
     private async Task Save()
     {
-        var response = await BlogHttpClient.PutAsJsonAsync($"https://localhost:7022/api/Comment/{CommentId}", comment);
+        var response = await HttpClient.PutAsJsonAsync($"/api/Comment/{CommentId}", comment);
     }
-
 }

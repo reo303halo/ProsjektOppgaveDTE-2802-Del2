@@ -2,11 +2,8 @@
 @inject IAuthenticationService AuthenticationService
 @inject NavigationManager NavigationManager
 @using ProsjektOppgaveDTE_2802.AuthProviders
-@using ProsjektOppgaveDTE_2802.Models.ViewModel
 
 <PageTitle>Login</PageTitle>
-
-@* <input type="button" class="btn btn-primary" value="Login" @onclick="() => BlazorService.LoginUser(userName, password)" /> *@
 
 <div class="row">
     <div class="col-md-4">
@@ -38,7 +35,7 @@
     private string _passwordFieldType = "password";
     
     private bool ShowError { get; set; }
-    private string Error { get; set; }
+    private string Error { get; set; } = string.Empty;
     
     private void TogglePasswordVisibility()
     {

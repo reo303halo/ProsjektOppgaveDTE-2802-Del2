@@ -1,9 +1,5 @@
 ﻿@page "/post"
 
-@using ProsjektOppgaveDTE_2802.Models
-@using Microsoft.AspNetCore.Identity
-@inject HttpClient BlogHttpClient
-
 <h3>Create post</h3>
 
 @if (post == null)
@@ -42,41 +38,10 @@ else
     [Parameter]
     public int PostId { get; set; }
 
-
     private Post post = new Post();
-
-
+    
     private async Task Save()
     {
-        
-        string dateStr = "2023-12-06T04:26:57.086Z";
-        DateTimeOffset lockoutEnd = DateTimeOffset.Parse(dateStr);
-        var hasher = new PasswordHasher<IdentityUser>();
-        post.OwnerId = "57365b7a-5844-4312-a38d-fbb40efbdf08";
-        post.Owner = new IdentityUser
-            {
-            UserName = "admin",
-            NormalizedUserName = "ADMIN",
-            Email = "admin@example.com",
-            NormalizedEmail = "ADMIN@EXAMPLE.COM",
-            EmailConfirmed = true,
-            PasswordHash = hasher.HashPassword(null, "AdminPassword123!"),
-            SecurityStamp = string.Empty,
-            ConcurrencyStamp = string.Empty,
-            PhoneNumber = string.Empty,
-            PhoneNumberConfirmed = false,
-            TwoFactorEnabled = false,
-            LockoutEnd = lockoutEnd,
-            LockoutEnabled = false,
-            AccessFailedCount = 0
-
-
-        };
-
-
-        var response = await BlogHttpClient.PostAsJsonAsync("https://localhost:7022/api/post", post);
-
-
+        var response = await HttpClient.PostAsJsonAsync("/api/post", post);
     }
-
 }

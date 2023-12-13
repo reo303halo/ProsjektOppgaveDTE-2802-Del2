@@ -1,7 +1,4 @@
 ﻿@page "/posts/{BlogId}"
-@using ProsjektOppgaveDTE_2802.Models
-@inject HttpClient BlogHttpClient
-@inject NavigationManager NavigationManager
 
 <h3>Posts</h3>
 
@@ -42,11 +39,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        posts = await BlogHttpClient.GetFromJsonAsync<Post[]>($"https://localhost:7022/api/Post?blogId={BlogId}");
+        posts = await HttpClient.GetFromJsonAsync<Post[]>($"/api/Post?blogId={BlogId}");
     }
 
     private async Task DeleteBlog(int id)
     {
-        var response = await BlogHttpClient.DeleteAsync($"https://localhost:7022/api/Post/{id}");
+        var response = await HttpClient.DeleteAsync($"/api/Post/{id}");
     }
 }

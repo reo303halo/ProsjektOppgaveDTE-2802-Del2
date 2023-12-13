@@ -4,8 +4,7 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using ProsjektOppgaveDTE_2802.Features;
 
-namespace  ProsjektOppgaveBlazor.AuthProviders;
-
+namespace  ProsjektOppgaveDTE_2802.AuthProviders;
 
 public class AuthStateProvider: AuthenticationStateProvider
 {
@@ -14,7 +13,7 @@ public class AuthStateProvider: AuthenticationStateProvider
     private readonly AuthenticationState _anonymous;
     
     
-    public AuthStateProvider(HttpClient httpClient,ILocalStorageService localStorage)
+    public AuthStateProvider(HttpClient httpClient, ILocalStorageService localStorage)
     {
         _httpClient = httpClient;
         _localStorage = localStorage;
@@ -29,7 +28,7 @@ public class AuthStateProvider: AuthenticationStateProvider
         {
             return _anonymous;
         }
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(JwtParser.ParseClaimsFromJwt(token), "jwtAuthType")));
         
     }
@@ -46,6 +45,4 @@ public class AuthStateProvider: AuthenticationStateProvider
         var authState = Task.FromResult(_anonymous);
         NotifyAuthenticationStateChanged(authState);
     }
-    
-    
 }

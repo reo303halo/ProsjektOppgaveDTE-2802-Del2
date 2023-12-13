@@ -1,13 +1,8 @@
-﻿
-@page "/blog/{BlogId:int}"
-
-@using Microsoft.AspNetCore.Identity
-@using ProsjektOppgaveDTE_2802.Models
-@inject HttpClient BlogHttpClient
+﻿@page "/blog/{BlogId:int}"
 
 <h3>Edit blog</h3>
 
-@if (blog == null)
+@if (_blog == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -15,18 +10,18 @@ else
 {
     <div class="row">
         <div class="col-md-3">
-            <EditForm Model="@blog" OnValidSubmit="Save">
+            <EditForm Model="@_blog" OnValidSubmit="Save">
                 <DataAnnotationsValidator/>
                 <div class="form-group">
                     <div>
-                        <label for="Name">Blog Name:</label>
-                        <InputText class="form-control" @bind-Value="blog.Name"/>
-                        <ValidationMessage For="@(()=>blog.Name)"/>
+                        <label id="Name">Blog Name:</label>
+                        <InputText class="form-control" @bind-Value="_blog.Name"/>
+                        <ValidationMessage For="@(()=>_blog.Name)"/>
                     </div>
                     <div class="form-check form-switch">
-                        <label for="Status">Allow post and comments</label>
+                        <label id="Status">Allow post and comments</label>
                         <InputCheckbox class="form-check-input" @bind-Value="Status"/>
-                        <ValidationMessage For="@(()=>blog.Status)" />
+                        <ValidationMessage For="@(()=>_blog.Status)" />
                     </div>
                     @*@if (blog.BlogTags != null)
                     {
@@ -51,28 +46,8 @@ else
 
     private bool Status
     {
-        get
-        {
-            if (blog.Status != 1)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-        set
-        {
-            if (!value)
-            {
-                blog.Status = 0;
-            }
-            else
-            {
-                blog.Status = 1;
-            }
-        }
+        get => _blog.Status == 1;
+        set => _blog.Status = value ? 1 : 0;
     }
 
     @*string showTags()
@@ -97,15 +72,14 @@ else
         return tags;
     }*@
 
-    private Blog blog;
+    private BlogViewModel? _blog;
     protected override async Task OnInitializedAsync()
     {
-        blog = await BlogHttpClient.GetFromJsonAsync<Blog>($"https://localhost:7022/api/Blog/{BlogId}");
+        _blog = await HttpClient.GetFromJsonAsync<BlogViewModel>($"/api/Blog/{BlogId}");
     }
 
     private async Task Save()
     {
-        var response = await BlogHttpClient.PutAsJsonAsync($"https://localhost:7022/api/Blog/{BlogId}", blog);
+        var response = await HttpClient.PutAsJsonAsync($"/api/Blog/{BlogId}", _blog);
     }
-
 }

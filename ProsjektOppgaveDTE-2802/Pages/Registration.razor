@@ -1,6 +1,5 @@
 @page "/registration"
 @using ProsjektOppgaveDTE_2802.AuthProviders
-@using ProsjektOppgaveDTE_2802.Models.ViewModel
 @inject IAuthenticationService AuthenticationService
 @inject NavigationManager NavigationManager
 
@@ -36,7 +35,7 @@
     private string ConfirmPassword { get; set; } = string.Empty;
     
     private bool ShowError { get; set; }
-    private string Error { get; set; }
+    private string Error { get; set; } = string.Empty;
     
     private void TogglePasswordVisibility()
     {

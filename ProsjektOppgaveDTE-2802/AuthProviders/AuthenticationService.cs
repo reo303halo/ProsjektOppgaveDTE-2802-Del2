@@ -2,7 +2,6 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
-using ProsjektOppgaveBlazor.AuthProviders;
 using ProsjektOppgaveDTE_2802.Models.ViewModel;
 using RegisterResponse = ProsjektOppgaveDTE_2802.Models.ViewModel.RegisterResponse;
 
@@ -25,7 +24,7 @@ public class AuthenticationService : IAuthenticationService
     
     public async Task<RegisterResponse> RegisterUser(LoginViewModel loginViewModel)
     {
-        var authResult = _httpClient.PostAsJsonAsync("https://localhost:7022/api/Auth/register", loginViewModel);
+        var authResult = _httpClient.PostAsJsonAsync("/api/Auth/register", loginViewModel);
         var authContent = authResult.Result.Content.ReadAsStringAsync();
         var jsonAuthContent = JsonSerializer.Deserialize<RegisterResponse>(authContent.Result, _serializerOptions);
         return jsonAuthContent;
@@ -33,7 +32,7 @@ public class AuthenticationService : IAuthenticationService
     
     public async Task<LoginResponse> Login(LoginViewModel loginViewModel)
     {
-        var authResult = await _httpClient.PostAsJsonAsync("https://localhost:7022/api/Auth/Login", loginViewModel);
+        var authResult = await _httpClient.PostAsJsonAsync("/api/Auth/Login", loginViewModel);
         var authContent = await authResult.Content.ReadAsStringAsync();
         var jsonAuthContent = JsonSerializer.Deserialize<LoginResponse>(authContent, _serializerOptions);
         
@@ -43,7 +42,7 @@ public class AuthenticationService : IAuthenticationService
         }
         await _localStorageService.SetItemAsync("authToken", jsonAuthContent.Token);
         ((AuthStateProvider)_authStateProvider).NotifyUserAuthentication(loginViewModel.Username);
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", jsonAuthContent.Token);
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jsonAuthContent.Token);
         
         return jsonAuthContent;
     }

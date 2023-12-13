@@ -1,9 +1,5 @@
 ﻿@page "/comment"
 
-@using Microsoft.AspNetCore.Identity
-@using ProsjektOppgaveDTE_2802.Models
-@inject HttpClient BlogHttpClient
-
 <h3>Create post</h3>
 
 @if (comment == null)
@@ -36,15 +32,11 @@ else
 @code {
     [Parameter]
     public int CommentId { get; set; }
-
-
+    
     private Comment comment = new Comment();
-
-
+    
     private async Task Save()
     {
-
-        var response = await BlogHttpClient.PostAsJsonAsync("https://localhost:7022/api/Comment", comment);
+        var response = await HttpClient.PostAsJsonAsync("/api/Comment", comment);
     }
-
 }
