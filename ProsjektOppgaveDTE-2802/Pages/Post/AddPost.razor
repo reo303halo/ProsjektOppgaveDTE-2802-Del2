@@ -1,8 +1,8 @@
-﻿@page "/post"
+﻿@page "/post/create/{BlogId}"
 
-<h3>Create post</h3>
+<h3>Create Post</h3>
 
-@if (post == null)
+@if (_post == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -10,21 +10,21 @@ else
 {
     <div class="row">
         <div class="col-md-3">
-            <EditForm Model="@post" OnValidSubmit="Save">
+            <EditForm Model="@_post" OnValidSubmit="Save">
                 <DataAnnotationsValidator/>
                 <div class="form-group">
                     <div>
-                        <label for="Name">Post title:</label>
-                        <InputText class="form-control" @bind-Value="post.Title" />
-                        <ValidationMessage For="@(()=>post.Title)" />
+                        <label id="post_title">Post Title:</label>
+                        <InputText class="form-control" placeholder="Title" @bind-Value="_post.Title" />
+                        <ValidationMessage For="@(()=>_post.Title)" />
                     </div>
                     <div>
-                        <label for="Name">Post content:</label>
-                        <InputText class="form-control" @bind-Value="post.Content" />
-                        <ValidationMessage For="@(()=>post.Content)" />
+                        <label id="post_content">Post Content:</label>
+                        <InputText class="form-control" placeholder="Content" @bind-Value="_post.Content" />
+                        <ValidationMessage For="@(()=>_post.Content)" />
                     </div>
                         
-                        <button class="btn btn-primary" type="submit">Save</button>
+                    <br/><button class="btn btn-primary" type="submit">Save</button>
                     
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 </div>
@@ -33,15 +33,24 @@ else
     </div>
 }
 
-
 @code {
     [Parameter]
-    public int PostId { get; set; }
-
-    private Post post = new Post();
+    public string? BlogId { get; set; }
+    
+    private readonly PostViewModel _post = new();
     
     private async Task Save()
     {
-        var response = await HttpClient.PostAsJsonAsync("/api/post", post);
+        _post.PostId = 0;
+        if (int.TryParse(BlogId, out var blogId))
+        {
+            _post.BlogId = blogId;
+            var response = await HttpClient.PostAsJsonAsync("/api/Post", _post);
+            NavigationManager.NavigateTo($"/posts/{BlogId}");
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/");
+        }
     }
 }

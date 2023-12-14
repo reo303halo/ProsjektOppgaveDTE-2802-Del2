@@ -39,11 +39,11 @@ public class PostController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState);
+            return BadRequest("ModelState not correct.");
         }
 
         var blog = _service.GetBlog(post.BlogId);
-        if (blog != null && blog.Status != 0) return BadRequest("This blog is closed for new posts and comments!");
+        if (blog != null && blog.Status != 1) return BadRequest("This blog is closed for new posts and comments!");
 
         var newPost = new Post
         {

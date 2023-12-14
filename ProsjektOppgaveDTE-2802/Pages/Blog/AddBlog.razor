@@ -46,5 +46,6 @@ else
     private async Task Save()
     {
         var response = await HttpClient.PostAsJsonAsync("/api/Blog", _blog);
+        NavigationManager.NavigateTo($"/blogs");
     }
 }

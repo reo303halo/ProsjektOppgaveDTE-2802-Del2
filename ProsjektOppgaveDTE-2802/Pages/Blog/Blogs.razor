@@ -23,7 +23,7 @@ else
             <td><a href="posts/@blog.BlogId" style="text-decoration:none;  color:inherit;">@blog.Name</a></td>
             <td>@blog.Owner.Email</td>
             <td><a href="blog/@blog.BlogId">Edit</a></td>
-            <td><a href="blogs" @onclick="@(e =>ConfirmDelete(blog.BlogId))">Delete</a></td>
+            <td><a class="btn btn-danger" @onclick="@(_ =>ConfirmDelete(blog.BlogId))">Delete</a></td>
         </tr>
     }
     </tbody>
@@ -43,6 +43,7 @@ else
     private async Task DeleteBlog(int id)
     {
         var response = await HttpClient.DeleteAsync($"/api/Blog/{id}");
+        NavigationManager.NavigateTo($"/blogs", true);
     }
     
     private async Task ConfirmDelete(int id)

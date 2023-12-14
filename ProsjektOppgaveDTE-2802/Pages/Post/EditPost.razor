@@ -1,8 +1,8 @@
-﻿@page "/post/{PostId:int}"
+﻿@page "/post/{PostId}"
 
 <h3>Edit post</h3>
 
-@if (post == null)
+@if (_post == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -10,20 +10,22 @@ else
 {
     <div class="row">
         <div class="col-md-3">
-            <EditForm Model="@post" OnValidSubmit="Save">
+            <EditForm Model="@_post" OnValidSubmit="Save">
                 <DataAnnotationsValidator/>
                 <div class="form-group">
-                        <div>
-                            <label for="Name">Post Title:</label>
-                        <InputText class="form-control" @bind-Value="post.Title" />
-                        <ValidationMessage For="@(()=>post.Title)" />
-                        </div>
-                        <div>
-                            <label for="Content">Post Content:</label>
-                            <InputText class="form-control" @bind-Value="post.Content" />
-                            <ValidationMessage For="@(()=>post.Content)" />
-                        </div>
-                        <button class="btn btn-primary" type="submit">Save</button>
+                    <div>
+                        <label id="post_title">Post Title:</label>
+                        <InputText class="form-control" @bind-Value="_post.Title" />
+                        <ValidationMessage For="@(()=>_post.Title)" />
+                    </div>
+                    <div>
+                        <label id="post_content">Post Content:</label>
+                        <InputText class="form-control" @bind-Value="_post.Content" />
+                        <ValidationMessage For="@(()=>_post.Content)" />
+                    </div>
+                    
+                    <br/><button class="btn btn-primary" type="submit">Save</button>
+                    
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 </div>
             </EditForm>
@@ -31,19 +33,20 @@ else
     </div>
 }
 
-
 @code {
     [Parameter]
     public int PostId { get; set; }
 
-    private Post post;
+    private PostViewModel? _post;
+    
     protected override async Task OnInitializedAsync()
     {
-        post = await HttpClient.GetFromJsonAsync<Post>($"/api/Post/{PostId}");
+        _post = await HttpClient.GetFromJsonAsync<PostViewModel>($"/api/Post/{PostId}");
     }
 
     private async Task Save()
     {
-        var response = await HttpClient.PutAsJsonAsync($"/api/Post/{PostId}", post);
+        var response = await HttpClient.PutAsJsonAsync($"/api/Post/{PostId}", _post);
+        NavigationManager.NavigateTo($"/posts/{_post.BlogId}");
     }
 }

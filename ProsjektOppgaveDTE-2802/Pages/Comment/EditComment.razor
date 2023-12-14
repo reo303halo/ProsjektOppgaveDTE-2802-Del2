@@ -2,7 +2,7 @@
 
 <h3>Edit comment</h3>
 
-@if (comment == null)
+@if (_comment == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -10,13 +10,13 @@ else
 {
     <div class="row">
         <div class="col-md-3">
-            <EditForm Model="@comment" OnValidSubmit="Save">
+            <EditForm Model="@_comment" OnValidSubmit="Save">
                 <DataAnnotationsValidator/>
                 <div class="form-group">
                         <div>
                             <label for="Name">Comment:</label>
-                        <InputText class="form-control" @bind-Value="comment.Text" />
-                        <ValidationMessage For="@(()=>comment.Text)" />
+                        <InputText class="form-control" @bind-Value="_comment.Text" />
+                        <ValidationMessage For="@(()=>_comment.Text)" />
                         </div>
                         <button class="btn btn-primary" type="submit">Save</button>
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -26,19 +26,19 @@ else
     </div>
 }
 
-
 @code {
     [Parameter]
     public int CommentId { get; set; }
 
-    private Comment comment;
+    private Comment? _comment;
     protected override async Task OnInitializedAsync()
     {
-        comment = await HttpClient.GetFromJsonAsync<Comment>($"/api/Comment/{CommentId}");
+        _comment = await HttpClient.GetFromJsonAsync<Comment>($"/api/Comment/{CommentId}");
     }
     
     private async Task Save()
     {
-        var response = await HttpClient.PutAsJsonAsync($"/api/Comment/{CommentId}", comment);
+        var response = await HttpClient.PutAsJsonAsync($"/api/Comment/{CommentId}", _comment);
+        NavigationManager.NavigateTo($"/comments/{_comment.PostId}");
     }
 }

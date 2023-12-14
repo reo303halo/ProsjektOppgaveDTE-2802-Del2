@@ -1,8 +1,8 @@
-﻿@page "/comment"
+﻿@page "/comment/create/{PostId}"
 
-<h3>Create post</h3>
+<h3>Create Comment</h3>
 
-@if (comment == null)
+@if (_comment == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -10,16 +10,16 @@ else
 {
     <div class="row">
         <div class="col-md-3">
-            <EditForm Model="@comment" OnValidSubmit="Save">
+            <EditForm Model="@_comment" OnValidSubmit="Save">
                 <DataAnnotationsValidator/>
                 <div class="form-group">
                     <div>
-                        <label for="Name">Comment:</label>
-                        <InputText class="form-control" @bind-Value="comment.Text" />
-                        <ValidationMessage For="@(()=>comment.Text)" />
+                        <label id="comment">Comment:</label>
+                        <InputText class="form-control" placeholder="Write Comment here..." @bind-Value="_comment.Text" />
+                        <ValidationMessage For="@(()=>_comment.Text)" />
                     </div>
 
-                        <button class="btn btn-primary" type="submit">Save</button>
+                    <button class="btn btn-primary" type="submit">Save</button>
                     
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 </div>
@@ -31,12 +31,22 @@ else
 
 @code {
     [Parameter]
-    public int CommentId { get; set; }
+    public string PostId { get; set; }
     
-    private Comment comment = new Comment();
+    private readonly CommentViewModel _comment = new();
     
     private async Task Save()
     {
-        var response = await HttpClient.PostAsJsonAsync("/api/Comment", comment);
+        _comment.CommentId = 0;
+        if (int.TryParse(PostId, out var postId))
+        {
+            _comment.PostId = postId;
+            var response = await HttpClient.PostAsJsonAsync("/api/Comment", _comment);
+            NavigationManager.NavigateTo($"/comments/{PostId}");
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/");
+        }
     }
 }

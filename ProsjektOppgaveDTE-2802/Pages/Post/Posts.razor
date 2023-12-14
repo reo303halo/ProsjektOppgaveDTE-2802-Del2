@@ -1,10 +1,9 @@
 ﻿@page "/posts/{BlogId}"
+@inject IJSRuntime JsRuntime
 
 <h3>Posts</h3>
 
-<a class="btn btn-primary" href="post">Create</a>
-
-@if (posts == null) 
+@if (_posts == null) 
 {
     <p><em>Loading...</em></p>
 }
@@ -18,32 +17,44 @@ else
     </tr>
     </thead>
     <tbody>
-    @foreach (var post in posts)
+    @foreach (var post in _posts)
     {
         <tr>
-            <td>@post.Title</td>
+            <td><a href="comments/@post.PostId" style="text-decoration:none;  color:inherit;">@post.Title</a></td>
             <td>@post.Content</td>
-            <td><a href="comments/@post.PostId">View</a></td>
+            
             <td><a href="post/@post.PostId">Edit</a></td>
-            <td><a href="posts" @onclick="@(e =>DeleteBlog(post.PostId))">Delete</a></td>
+            <td><a class="btn btn-danger" @onclick="@(_ =>ConfirmDelete(post.PostId))">Delete</a></td>
         </tr>
     }
     </tbody>
     </table>
 }
 
+<a class="btn btn-primary" href="post/create/@BlogId">Create Post</a>
+
 @code {
     [Parameter]
-    public string BlogId { get; set; }
-    private Post[] posts;
+    public string? BlogId { get; set; }
+    private Post[]? _posts;
 
     protected override async Task OnInitializedAsync()
     {
-        posts = await HttpClient.GetFromJsonAsync<Post[]>($"/api/Post?blogId={BlogId}");
+        _posts = await HttpClient.GetFromJsonAsync<Post[]>($"/api/Post?blogId={BlogId}");
     }
 
-    private async Task DeleteBlog(int id)
+    private async Task DeletePost(int id)
     {
         var response = await HttpClient.DeleteAsync($"/api/Post/{id}");
+        NavigationManager.NavigateTo($"/posts/{BlogId}", true);
+    }
+    
+    private async Task ConfirmDelete(int id)
+    {
+        var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this post?");
+        if (confirmed)
+        {
+            await DeletePost(id);
+        }
     }
 }
