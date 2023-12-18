@@ -9,26 +9,26 @@
 }
 else
 {
-    <table class="table" >
-    <thead>
-    <tr>
-        <th>Title</th>
-        <th>Content</th>
-    </tr>
-    </thead>
-    <tbody>
     @foreach (var post in _posts)
     {
-        <tr>
-            <td><a href="comments/@post.PostId" style="text-decoration:none;  color:inherit;">@post.Title</a></td>
-            <td>@post.Content</td>
-            
-            <td><a href="post/@post.PostId">Edit</a></td>
-            <td><a class="btn btn-danger" @onclick="@(_ =>ConfirmDelete(post.PostId))">Delete</a></td>
-        </tr>
+        <div class="card" style="width: 30rem;">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h2 class="card-title">@post.Title</h2>
+                    </div>
+                    <div class="col-sm-2">
+                        <a href="post/@post.PostId" class="btn btn-primary">Edit</a>
+                    </div>
+                    <div class="col-sm-2">
+                        <a class="btn btn-danger" @onclick="@(_ => ConfirmDelete(post.PostId))">Delete</a>
+                    </div>
+                </div>
+                <p class="card-text">@post.Content</p>
+                <a class="btn btn-primary" href="comments/@post.PostId">See Post</a>
+            </div>
+        </div><br/>
     }
-    </tbody>
-    </table>
 }
 
 <a class="btn btn-primary" href="post/create/@BlogId">Create Post</a>
@@ -45,7 +45,7 @@ else
 
     private async Task DeletePost(int id)
     {
-        var response = await HttpClient.DeleteAsync($"/api/Post/{id}");
+        await HttpClient.DeleteAsync($"/api/Post/{id}");
         NavigationManager.NavigateTo($"/posts/{BlogId}", true);
     }
     

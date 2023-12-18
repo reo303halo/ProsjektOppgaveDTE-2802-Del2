@@ -9,6 +9,8 @@
 }
 else
 {
+    <input @bind="SearchString" @bind:event="oninput" @onkeyup="ApplyFilter" placeholder="Search..." >
+    
     <table class="table" >
     <thead>
     <tr>
@@ -34,10 +36,13 @@ else
 
 @code {
     private Blog[]? _blogs;
+    private string SearchString { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        _blogs = await HttpClient.GetFromJsonAsync<Blog[]>("/api/Blog");
+        var blogs = await HttpClient.GetFromJsonAsync<Blog[]>("/api/Blog");
+
+        _blogs = !string.IsNullOrEmpty(SearchString) ? blogs.Where(b => b.Name.Contains(SearchString, StringComparison.OrdinalIgnoreCase)).ToArray() : blogs;
     }
 
     private async Task DeleteBlog(int id)
@@ -53,5 +58,10 @@ else
         {
             await DeleteBlog(id);
         }
+    }
+    
+    private async Task ApplyFilter()
+    {
+        await OnInitializedAsync();
     }
 }

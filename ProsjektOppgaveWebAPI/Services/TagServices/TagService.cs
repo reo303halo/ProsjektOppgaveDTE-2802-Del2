@@ -14,6 +14,18 @@ public class TagService : ITagService
         _manager = userManager;
         _db = db;
     }
+
+    
+    // Tag
+    public Tag? GetTag(int id)
+    {
+        var t = (from tag in _db.Tag
+                where tag.Id == id
+                select tag)
+            .FirstOrDefault();
+
+        return t;
+    }
     
     public async Task Save(Tag tag)
     {
@@ -24,4 +36,13 @@ public class TagService : ITagService
             await _db.SaveChangesAsync();
         }
     }
+    
+    
+    // Relation
+    /*
+    public BlogTagRelations? GetRelation(int blogId)
+    {
+        
+    }
+    */
 }

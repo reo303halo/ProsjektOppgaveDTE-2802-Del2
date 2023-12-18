@@ -2,50 +2,69 @@
 
 <h3>Create blog</h3>
 
-@if (_blog == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div class="row">
-        <div class="col-md-3">
-            <EditForm Model="@_blog" OnValidSubmit="Save">
-                <DataAnnotationsValidator/>
-                <div class="form-group">
-                    <div>
-                        <label id="Name">Blog Name:</label>
-                        <InputText class="form-control" @bind-Value="_blog.Name" />
-                        <ValidationMessage For="@(()=>_blog.Name)" />
-                    </div>
-                    <div class="form-check form-switch">
-                        <label id="Status">Allow post and comments</label>
-                        <InputCheckbox class="form-check-input" @bind-Value="Status" />
-                    </div>
-                        <button class="btn btn-primary" type="submit">Save</button>
-                    
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="row">
+    <div class="col-md-3">
+        <EditForm Model="@_blog" OnValidSubmit="Save">
+            <DataAnnotationsValidator/>
+            <div class="form-group">
+                <div>
+                    <label id="blog_name">Blog Name:</label>
+                    <InputText class="form-control" @bind-Value="_blog.Name" />
+                    <ValidationMessage For="@(()=>_blog.Name)" />
                 </div>
-            </EditForm>
-        </div>
+                <div class="form-check form-switch">
+                    <label id="blog_status">Allow post and comments</label>
+                    <InputCheckbox class="form-check-input" @bind-Value="Status" />
+                </div>
+                
+                <button class="btn btn-primary" type="submit">Save</button>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            </div>
+        </EditForm>
     </div>
+</div>
+
+<form @onsubmit="AddTag">
+    <input @bind="NewTag" placeholder="Add tag..." />
+    <button class="btn btn-primary" type="submit">+</button>
+</form>
+
+@if (Tags.Count != 0)
+{
+    foreach (var tag in Tags)
+    {
+        <span class="tag" @onclick="() => RemoveTag(tag)">@tag</span><br/>
+    }
 }
 
 @code {
-    [Parameter]
-    public int BlogId { get; set; }
-
+    private readonly BlogViewModel _blog = new();
     private bool Status
     {
         get => _blog.Status == 1;
         set => _blog.Status = value ? 1 : 0;
     }
-
-    private readonly BlogViewModel _blog = new();
+    
+    private string NewTag { get; set; } = string.Empty;
+    private List<string> Tags { get; } = new();
     
     private async Task Save()
     {
         var response = await HttpClient.PostAsJsonAsync("/api/Blog", _blog);
         NavigationManager.NavigateTo($"/blogs");
+    }
+    
+    private void AddTag()
+    {
+        if (NewTag != string.Empty)
+        {
+            Tags.Add(NewTag);
+        }
+        NewTag = string.Empty;
+    }
+
+    private void RemoveTag(string tag)
+    {
+        Tags.Remove(tag);
     }
 }

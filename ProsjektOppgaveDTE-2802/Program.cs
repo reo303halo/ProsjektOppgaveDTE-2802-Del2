@@ -15,7 +15,7 @@ builder.Services.AddSignalR();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddSingleton<HttpClient>(_ => new HttpClient
+builder.Services.AddScoped<HttpClient>(_ => new HttpClient
 {
     BaseAddress = new Uri("https://localhost:7022")
 });
