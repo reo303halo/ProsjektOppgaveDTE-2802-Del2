@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProsjektOppgaveWebAPI.Data;
 using ProsjektOppgaveWebAPI.Models;
-using ProsjektOppgaveWebAPI.Models.ViewModel;
 
 namespace ProsjektOppgaveWebAPI.Services.CommentServices;
 

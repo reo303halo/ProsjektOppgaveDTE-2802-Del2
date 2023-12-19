@@ -76,7 +76,7 @@ public class PostControllerTest
     {
         // Arrange
         var post = new PostViewModel { BlogId = 1 };
-        var blog = new Blog { Status = 1 };
+        var blog = new Blog { Status = 0 };
         _serviceMock.Setup(service => service.GetBlog(post.BlogId)).Returns(blog);
 
         // Act
@@ -91,7 +91,7 @@ public class PostControllerTest
     {
         // Arrange
         var post = new PostViewModel { BlogId = 1 };
-        var blog = new Blog { Status = 0 };
+        var blog = new Blog { Status = 1 };
         _serviceMock.Setup(service => service.GetBlog(post.BlogId)).Returns(blog);
 
         var newPost = new Post { BlogId = post.BlogId };
@@ -102,9 +102,9 @@ public class PostControllerTest
             new Claim(ClaimTypes.NameIdentifier, "userId"),
         }));
 
-        _controller.ControllerContext = new ControllerContext()
+        _controller.ControllerContext = new ControllerContext
         {
-            HttpContext = new DefaultHttpContext() { User = user }
+            HttpContext = new DefaultHttpContext { User = user }
         };
 
         // Act

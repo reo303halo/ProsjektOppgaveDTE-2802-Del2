@@ -53,8 +53,8 @@ public class PostController : ControllerBase
         };
         
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        
-        await _service.SavePost(newPost, userId);
+
+        if (userId != null) await _service.SavePost(newPost, userId);
         return CreatedAtAction("GetPosts", new { id = post.BlogId }, post);
     }
 

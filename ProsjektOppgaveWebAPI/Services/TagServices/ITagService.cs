@@ -4,7 +4,7 @@ namespace ProsjektOppgaveWebAPI.Services.TagServices;
 
 public interface ITagService
 {
-    Tag? GetTag(string name);
+    Tag? GetTag(string? name);
     
     Task Save(Tag tag);
 

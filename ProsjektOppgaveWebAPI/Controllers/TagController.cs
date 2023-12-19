@@ -19,9 +19,9 @@ public class TagController : ControllerBase
 
 
     [HttpGet("{name}")]
-    public Tag? GetTag([FromRoute] string name)
+    public Tag? GetTag([FromRoute] string? name)
     {
-        return _service.GetTag(name.ToLower());
+        return _service.GetTag(name?.ToLower());
     }
 
 
@@ -42,7 +42,7 @@ public class TagController : ControllerBase
 
         var newTag = new Tag
         {
-            Name = tag.Name.ToLower()
+            Name = tag.Name?.ToLower()
         };
         
         await _service.Save(newTag);

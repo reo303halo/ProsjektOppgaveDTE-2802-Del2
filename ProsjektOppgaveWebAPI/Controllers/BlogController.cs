@@ -58,8 +58,8 @@ public class BlogController : ControllerBase
         };
         
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        
-        await _service.Save(newBlog, userId);
+
+        if (userId != null) await _service.Save(newBlog, userId);
         return CreatedAtAction("Get", new { id = blog.BlogId }, newBlog);
     }
 

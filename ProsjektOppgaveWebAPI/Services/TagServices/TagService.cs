@@ -14,7 +14,7 @@ public class TagService : ITagService
 
     
     // Tag
-    public Tag? GetTag(string name)
+    public Tag? GetTag(string? name)
     {
         var t = (from tag in _db.Tag
                 where tag.Name == name
