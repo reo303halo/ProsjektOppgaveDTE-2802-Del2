@@ -23,14 +23,6 @@ else
                         <InputCheckbox class="form-check-input" @bind-Value="Status"/>
                         <ValidationMessage For="@(()=>_blog.Status)" />
                     </div>
-                    @*@if (blog.BlogTags != null)
-                    {
-                        <div>
-                            <label for="Tags">Tags:</label>
-                            <textarea class="form-control" readonly>@showTags()</textarea>
-
-                        </div>
-                    }*@
                         <button class="btn btn-primary" type="submit">Save</button>
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 </div>
@@ -50,28 +42,6 @@ else
         set => _blog.Status = value ? 1 : 0;
     }
 
-    @*string showTags()
-    {
-        string tags = "";
-        int length = blog.BlogTags.Count();
-        int index = 0;
-        foreach (var tag in blog.BlogTags)
-        {
-            if (length > 0)
-            {
-                tags += tag + ", ";
-                index += 1;
-            }
-            else
-            {
-                tags += tag;
-            }
-
-
-        }
-        return tags;
-    }*@
-
     private BlogViewModel? _blog;
     protected override async Task OnInitializedAsync()
     {
@@ -80,6 +50,7 @@ else
 
     private async Task Save()
     {
-        var response = await HttpClient.PutAsJsonAsync($"/api/Blog/{BlogId}", _blog);
+        await HttpClient.PutAsJsonAsync($"/api/Blog/{BlogId}", _blog);
+        NavigationManager.NavigateTo($"/blogs", true);
     }
 }

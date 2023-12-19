@@ -18,10 +18,10 @@ public class TagController : ControllerBase
     }
 
 
-    [HttpGet("{id:int}")]
-    public Tag? GetTag([FromRoute] int id)
+    [HttpGet("{name}")]
+    public Tag? GetTag([FromRoute] string name)
     {
-        return _service.GetTag(id);
+        return _service.GetTag(name.ToLower());
     }
 
 
@@ -33,13 +33,38 @@ public class TagController : ControllerBase
         {
             return BadRequest(ModelState);
         }
+        
+        var existingTag = _service.GetTag(tag.Name);
+        if (existingTag != null)
+        {
+            return new JsonResult(existingTag);
+        }
 
         var newTag = new Tag
         {
-            Name = tag.Name
+            Name = tag.Name.ToLower()
         };
-
+        
         await _service.Save(newTag);
-        return CreatedAtAction("GetTag", new { id = newTag.Id }, newTag);
+        return CreatedAtAction("GetTag", new { name = tag.Name }, newTag);
+    }
+
+    [Authorize]
+    [HttpPost("Relation")]
+    public async Task<IActionResult> CreateRelation([FromBody] BlogTagRelationsViewModel relation)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var newRelation = new BlogTagRelations
+        {
+            BlogId = relation.BlogId,
+            TagId = relation.TagId
+        };
+        
+        await _service.SaveRelation(newRelation);
+        return Ok("Relation successful!");
     }
 }

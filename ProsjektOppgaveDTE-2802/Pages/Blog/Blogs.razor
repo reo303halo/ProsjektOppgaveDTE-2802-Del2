@@ -23,7 +23,7 @@ else
     {
         <tr>
             <td><a href="posts/@blog.BlogId" style="text-decoration:none;  color:inherit;">@blog.Name</a></td>
-            <td>@blog.Owner.Email</td>
+            <td>@blog.OwnerEmail</td>
             <td><a href="blog/@blog.BlogId">Edit</a></td>
             <td><a class="btn btn-danger" @onclick="@(_ =>ConfirmDelete(blog.BlogId))">Delete</a></td>
         </tr>
@@ -35,19 +35,25 @@ else
 <a class="btn btn-primary" href="blog">Create Blog</a>
 
 @code {
-    private Blog[]? _blogs;
+    private AllBlogViewModel[]? _blogs;
     private string SearchString { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        var blogs = await HttpClient.GetFromJsonAsync<Blog[]>("/api/Blog");
+        var blogs = await HttpClient.GetFromJsonAsync<AllBlogViewModel[]>("/api/Blog");
 
-        _blogs = !string.IsNullOrEmpty(SearchString) ? blogs.Where(b => b.Name.Contains(SearchString, StringComparison.OrdinalIgnoreCase)).ToArray() : blogs;
+        if (blogs != null) 
+        {
+            _blogs = !string.IsNullOrEmpty(SearchString) 
+                ? blogs.Where(b => b.Name.Contains(SearchString, StringComparison.OrdinalIgnoreCase) || 
+                                   b.BlogTags.Any(t => t.Tag.Name.Contains(SearchString, StringComparison.OrdinalIgnoreCase))).ToArray() 
+                : blogs;
+        }
     }
-
+    
     private async Task DeleteBlog(int id)
     {
-        var response = await HttpClient.DeleteAsync($"/api/Blog/{id}");
+        await HttpClient.DeleteAsync($"/api/Blog/{id}");
         NavigationManager.NavigateTo($"/blogs", true);
     }
     

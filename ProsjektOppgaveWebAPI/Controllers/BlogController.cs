@@ -20,7 +20,7 @@ public class BlogController : ControllerBase
 
 
     [HttpGet]
-    public async Task<IEnumerable<Blog>> GetAll()
+    public async Task<IEnumerable<AllBlogViewModel>> GetAll()
     {
         return await _service.GetAllBlogs();
     }
@@ -60,7 +60,7 @@ public class BlogController : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
         await _service.Save(newBlog, userId);
-        return CreatedAtAction("Get", new { id = blog.BlogId }, blog);
+        return CreatedAtAction("Get", new { id = blog.BlogId }, newBlog);
     }
 
 

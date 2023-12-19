@@ -1,4 +1,7 @@
 ﻿@page "/blog"
+@using System.Text.Json
+@using ProsjektOppgaveWebAPI.Models.ViewModel
+@using System.Runtime.InteropServices
 
 <h3>Create blog</h3>
 
@@ -44,13 +47,28 @@
         get => _blog.Status == 1;
         set => _blog.Status = value ? 1 : 0;
     }
-    
     private string NewTag { get; set; } = string.Empty;
     private List<string> Tags { get; } = new();
     
     private async Task Save()
     {
         var response = await HttpClient.PostAsJsonAsync("/api/Blog", _blog);
+        if (response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadFromJsonAsync<Blog>();
+            var blogId = content.BlogId;
+
+            foreach (var newTag in Tags.Select(tag => new TagViewModel { Name = tag }))
+            {
+                var tagResponse = await HttpClient.PostAsJsonAsync("/api/Tag", newTag);
+                if (!tagResponse.IsSuccessStatusCode) continue;
+                var tagContent = await tagResponse.Content.ReadFromJsonAsync<Tag>();
+                
+                var tagId = tagContent.Id;
+                var relation = new BlogTagRelationsViewModel { BlogId = blogId, TagId = tagId };
+                await HttpClient.PostAsJsonAsync("/api/Tag/Relation", relation);
+            }
+        }
         NavigationManager.NavigateTo($"/blogs");
     }
     

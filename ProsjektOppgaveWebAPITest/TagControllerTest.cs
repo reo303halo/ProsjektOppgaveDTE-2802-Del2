@@ -23,16 +23,16 @@ public class TagControllerTest
     public void GetComment_ReturnsExpectedComment()
     {
         // Arrange
-        const int tagId = 1;
-        var expectedTag = new Tag();
-        _serviceMock.Setup(service => service.GetTag(tagId)).Returns(expectedTag);
+        var name = "TestName";
+        var expectedTag = new Tag { Name = name};
+        _serviceMock.Setup(service => service.GetTag(name)).Returns(expectedTag);
 
         // Act
-        var result = _controller.GetTag(tagId);
+        var result = _controller.GetTag(name);
 
         // Assert
         Assert.Equal(expectedTag, result);
-        _serviceMock.Verify(x => x.GetTag(tagId), Times.Once);
+        _serviceMock.Verify(x => x.GetTag(name), Times.Once);
     }
 
     

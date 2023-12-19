@@ -19,22 +19,34 @@ public class BlogService : IBlogService
     
     
     // BLOGS
-    public async Task<IEnumerable<Blog>> GetAllBlogs()
+    public async Task<IEnumerable<AllBlogViewModel>> GetAllBlogs()
     {
         try
         {
             var blogs = _db.Blog
                 .Include(b => b.Owner)
+                .Include(b => b.BlogTags)
+                    .ThenInclude(bt => bt.Tag)
                 .ToList();
+            
+            var returnBlogs = blogs.Select(b => new AllBlogViewModel
+            {
+                BlogId = b.BlogId,
+                Name = b.Name,
+                OwnerId = b.OwnerId,
+                OwnerEmail = b.Owner.Email,
+                Status = b.Status,
+                BlogTags = b.BlogTags
+            }).ToList();
 
-            return blogs;
+            return returnBlogs;
         }
         catch (NullReferenceException ex)
         {
             Console.WriteLine(ex.Message);
             Console.WriteLine(ex.StackTrace);
             
-            return new List<Blog>();
+            return new List<AllBlogViewModel>();
         }
     }
     
@@ -44,6 +56,7 @@ public class BlogService : IBlogService
             where blog.BlogId == id
             select blog)
             .Include(b => b.BlogTags)
+                .ThenInclude(bt => bt.Tag)
             .FirstOrDefault();
         return b;
     }

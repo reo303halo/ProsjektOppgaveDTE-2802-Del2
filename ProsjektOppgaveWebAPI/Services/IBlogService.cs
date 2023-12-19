@@ -7,7 +7,7 @@ namespace ProsjektOppgaveWebAPI.Services;
 public interface IBlogService
 {
     // Blog
-    Task<IEnumerable<Blog>> GetAllBlogs();
+    Task<IEnumerable<AllBlogViewModel>> GetAllBlogs();
 
     Blog? GetBlog(int id);
     

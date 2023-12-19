@@ -18,6 +18,7 @@ public class BlogDbContext : IdentityDbContext<IdentityUser>
     public DbSet<Comment>? Comment { get; set; }
     public DbSet<IdentityUser>? User { get; set; }
     public DbSet<Tag>? Tag { get; set; }
+    public DbSet<BlogTagRelations> BlogTagRelations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

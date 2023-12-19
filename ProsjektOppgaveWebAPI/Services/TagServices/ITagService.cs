@@ -4,9 +4,9 @@ namespace ProsjektOppgaveWebAPI.Services.TagServices;
 
 public interface ITagService
 {
-    Tag? GetTag(int id);
+    Tag? GetTag(string name);
     
     Task Save(Tag tag);
 
-    //BlogTagRelations? GetRelation(int blogId);
+    Task SaveRelation(BlogTagRelations relation);
 }

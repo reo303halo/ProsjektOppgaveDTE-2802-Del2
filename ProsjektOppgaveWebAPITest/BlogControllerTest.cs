@@ -21,13 +21,13 @@ public class BlogControllerTest
         _controller = new BlogController(_mockService.Object);
     }
     
-    private static IEnumerable<Blog> GetTestBlogs()
+    private static IEnumerable<AllBlogViewModel> GetTestBlogs()
     {
-        return new List<Blog>
+        return new List<AllBlogViewModel>
         {
-            new Blog(),
-            new Blog(),
-            new Blog()
+            new AllBlogViewModel(),
+            new AllBlogViewModel(),
+            new AllBlogViewModel()
         };
     }
     
